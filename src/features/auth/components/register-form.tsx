@@ -1,6 +1,7 @@
 'use client';
 
 import z from 'zod';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -88,6 +89,12 @@ export function RegisterForm() {
                     disabled={isPending}
                     type="button"
                   >
+                    <Image
+                      alt="Google"
+                      src="logos/google.svg"
+                      width={20}
+                      height={20}
+                    />
                     Continue with Google
                   </Button>
                   <Button
@@ -96,6 +103,12 @@ export function RegisterForm() {
                     disabled={isPending}
                     type="button"
                   >
+                    <Image
+                      alt="Github"
+                      src="logos/github.svg"
+                      width={20}
+                      height={20}
+                    />
                     Continue with Github
                   </Button>
                 </div>

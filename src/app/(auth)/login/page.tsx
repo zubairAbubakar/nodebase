@@ -3,10 +3,7 @@ import { LoginForm } from '@/features/auth/components/login-form';
 
 const Page = async () => {
   await requireNoAuth();
-  return (
-    <div>
-      <LoginForm />
-    </div>
-  );
+
+  return <LoginForm />;
 };
 export default Page;
