@@ -1,0 +1,168 @@
+'use client';
+
+import z from 'zod';
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { authClient } from '@/lib/auth-client';
+import { toast } from 'sonner';
+
+const registerSchema = z
+  .object({
+    email: z.email('Please enter a valid email address'),
+    password: z.string().min(1, 'Password must be at least 1 character'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+export function RegisterForm() {
+  const router = useRouter();
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const onSubmit = async (data: RegisterFormData) => {
+    await authClient.signUp.email(
+      {
+        name: data.email,
+        email: data.email,
+        password: data.password,
+        callbackURL: '/',
+      },
+      {
+        onSuccess: () => {
+          router.push('/');
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+      }
+    );
+  };
+
+  const isPending = form.formState.isSubmitting;
+
+  return (
+    <div>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle>Get started</CardTitle>
+          <CardDescription>Please create your account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid gap-6">
+                <div className="flex flex-col gap-4">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isPending}
+                    type="button"
+                  >
+                    Continue with Google
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isPending}
+                    type="button"
+                  >
+                    Continue with Github
+                  </Button>
+                </div>
+                <div className="grid gap-6">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="me@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="******"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="******"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <Button disabled={isPending} type="submit" className="w-full">
+                    Sign up
+                  </Button>
+                </div>
+                <div className="text-center text-sm">
+                  Already have an account?{' '}
+                  <Link href="/login" className="underline underline-offset-4">
+                    Log in
+                  </Link>
+                </div>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
